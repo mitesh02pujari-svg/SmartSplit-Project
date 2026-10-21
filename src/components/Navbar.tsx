@@ -91,40 +91,40 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo & Bill Title */}
-            <div className="flex items-center space-x-3 sm:space-x-4 min-w-0">
-              <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-indigo-500 text-white shadow-md shadow-emerald-500/20 shrink-0">
-                <Split className="w-5 h-5 sm:w-6 sm:h-6" />
+            <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+              <div className="flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-indigo-500 text-white shadow-md shadow-emerald-500/20 shrink-0 flex-shrink-0">
+                <Split className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
               </div>
 
-              <div className="min-w-0">
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center space-x-1.5 sm:space-x-2">
+                  <span className="text-xs font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0 flex-shrink-0">
                     SmartSplit
                   </span>
-                  <span className="text-xs text-slate-400 hidden sm:inline">
-                    Universal Group Expense & Bill Engine
+                  <span className="text-xs text-slate-400 hidden sm:inline-flex">
+                    Group Expenses
                   </span>
                   {currentSession.category && (
-                    <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-slate-800 text-indigo-300 border border-slate-700 hidden md:inline">
+                    <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-slate-800 text-indigo-300 border border-slate-700 hidden sm:inline-flex shrink-0 flex-shrink-0">
                       {currentSession.category}
                     </span>
                   )}
                 </div>
 
                 {isEditingTitle ? (
-                  <div className="flex items-center mt-1 space-x-1.5 flex-wrap">
+                  <div className="flex items-center mt-1 space-x-1.5 min-w-0">
                     <input
                       type="text"
                       value={titleInput}
                       onChange={(e) => setTitleInput(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleSaveTitle()}
                       autoFocus
-                      className="bg-slate-800 border border-emerald-500 rounded px-2 py-0.5 text-sm sm:text-base text-white focus:outline-none focus:ring-1 focus:ring-emerald-400 w-44 sm:w-64 font-sans"
+                      className="bg-slate-800 border border-emerald-500 rounded px-2 py-0.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-400 truncate max-w-[140px] xs:max-w-[180px] sm:max-w-xs font-sans min-w-0"
                     />
                     <select
                       value={categoryInput}
                       onChange={(e) => setCategoryInput(e.target.value as any)}
-                      className="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-xs text-slate-200 focus:outline-none"
+                      className="bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-slate-200 focus:outline-none shrink-0 flex-shrink-0"
                     >
                       <option value="Road Trip">🚗 Road Trip</option>
                       <option value="Vacation">🏖️ Vacation</option>
@@ -135,25 +135,25 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </select>
                     <button
                       onClick={handleSaveTitle}
-                      className="p-1 text-emerald-400 hover:text-emerald-300"
+                      className="p-1 text-emerald-400 hover:text-emerald-300 shrink-0 flex-shrink-0"
                       title="Save Title"
                     >
-                      <Check className="w-4 h-4" />
+                      <Check className="w-4 h-4 shrink-0" />
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-2 mt-0.5">
+                  <div className="flex items-center space-x-1.5 mt-0.5 min-w-0">
                     <h1
                       onClick={() => {
                         setTitleInput(currentSession.title);
                         setCategoryInput(currentSession.category || 'General');
                         setIsEditingTitle(true);
                       }}
-                      className="text-base sm:text-lg font-semibold text-slate-100 truncate cursor-pointer hover:text-emerald-300 transition-colors flex items-center group max-w-[190px] sm:max-w-xs md:max-w-md"
-                      title="Click to rename bill and change category"
+                      className="text-sm sm:text-base md:text-lg font-semibold text-slate-100 truncate max-w-[140px] xs:max-w-[180px] sm:max-w-xs cursor-pointer hover:text-emerald-300 transition-colors flex items-center group"
+                      title={`${currentSession.title} (Click to rename)`}
                     >
-                      {currentSession.title}
-                      <Edit2 className="w-3.5 h-3.5 ml-1.5 opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity" />
+                      <span className="truncate">{currentSession.title}</span>
+                      <Edit2 className="w-3.5 h-3.5 ml-1.5 opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity shrink-0 flex-shrink-0" />
                     </h1>
                   </div>
                 )}
@@ -161,45 +161,45 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             {/* Quick Action Buttons */}
-            <div className="flex items-center space-x-1.5 sm:space-x-2.5 shrink-0">
+            <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0 flex-shrink-0">
               {/* Load Templates & Scenarios */}
               <button
                 onClick={() => setShowTemplatesModal(true)}
-                className="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shadow-xs hover:border-slate-600"
+                className="flex items-center space-x-1.5 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs sm:text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shadow-xs hover:border-slate-600 shrink-0 flex-shrink-0"
                 title="Select pre-loaded group scenarios (Road Trip, Goa Villa, Restaurant Dinner, Flatmates)"
               >
-                <Sparkles className="w-4 h-4 text-amber-400" />
-                <span className="hidden md:inline">Scenarios</span>
-                <span className="md:hidden">Demos</span>
+                <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                <span className="hidden sm:inline">Scenarios</span>
               </button>
 
               {/* Saved Bills List */}
               <button
                 onClick={openSavedBills}
-                className="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shadow-xs"
+                className="flex items-center space-x-1.5 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs sm:text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shadow-xs shrink-0 flex-shrink-0"
                 title="View saved bills history"
               >
-                <FolderOpen className="w-4 h-4 text-teal-400" />
+                <FolderOpen className="w-4 h-4 text-teal-400 shrink-0" />
                 <span className="hidden sm:inline">Saved</span>
               </button>
 
               {/* New Bill */}
               <button
                 onClick={onNewBill}
-                className="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shadow-xs"
+                className="flex items-center space-x-1.5 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs sm:text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shadow-xs shrink-0 flex-shrink-0"
                 title="Start a new blank bill"
               >
-                <PlusCircle className="w-4 h-4 text-emerald-400" />
+                <PlusCircle className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span className="hidden sm:inline">New</span>
               </button>
 
               {/* Export / Share Modal Button */}
               <button
                 onClick={onOpenExportModal}
-                className="flex items-center space-x-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-700/30 transition transform active:scale-95"
+                className="flex items-center space-x-1.5 p-2 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-700/30 transition transform active:scale-95 shrink-0 flex-shrink-0"
+                title="Export or Share Bill"
               >
-                <Share2 className="w-4 h-4" />
-                <span>Export / Share</span>
+                <Share2 className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Export / Share</span>
               </button>
             </div>
           </div>

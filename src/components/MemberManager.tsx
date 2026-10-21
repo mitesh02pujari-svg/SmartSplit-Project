@@ -24,6 +24,7 @@ interface MemberManagerProps {
   onDeleteMember: (id: string) => void;
   onSelectMemberPassbook: (member: Member) => void;
   currency: string;
+  onLoadSample?: () => void;
 }
 
 export const MemberManager: React.FC<MemberManagerProps> = ({
@@ -36,6 +37,7 @@ export const MemberManager: React.FC<MemberManagerProps> = ({
   onDeleteMember,
   onSelectMemberPassbook,
   currency,
+  onLoadSample,
 }) => {
   const [singleName, setSingleName] = useState('');
   const [singleUpi, setSingleUpi] = useState('');
@@ -158,16 +160,24 @@ export const MemberManager: React.FC<MemberManagerProps> = ({
             <Users className="w-8 h-8" />
           </div>
           <h3 className="text-base font-bold text-slate-800">No members in group yet</h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-5">
-            Add friends, trip buddies, or flatmates to start allocating items and upfront payments.
+          <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto mt-1 mb-5">
+            Add group members above or load a sample scenario to get started.
           </p>
-          <div className="flex justify-center gap-3">
+          <div className="flex flex-wrap justify-center gap-3">
             <button
               onClick={() => setShowBatchModal(true)}
-              className="px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-600 text-white hover:bg-emerald-500 transition"
+              className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-emerald-600 text-white hover:bg-emerald-500 transition shadow-xs"
             >
               Batch Add Members
             </button>
+            {onLoadSample && (
+              <button
+                onClick={onLoadSample}
+                className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition"
+              >
+                Load Sample Scenario
+              </button>
+            )}
           </div>
         </div>
       ) : (

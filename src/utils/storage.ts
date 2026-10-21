@@ -14,6 +14,16 @@ export interface SavedBillSummary {
   category?: string;
 }
 
+export const createEmptyBill = (): BillSession => ({
+  id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `bill-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+  title: 'New Expense Split',
+  createdAt: new Date().toISOString(),
+  members: [],
+  items: [],
+  payments: [],
+  settledTransactionIds: [],
+});
+
 export function loadCurrentBillSession(): BillSession {
   try {
     const raw = localStorage.getItem(CURRENT_BILL_KEY);
@@ -35,10 +45,10 @@ export function loadCurrentBillSession(): BillSession {
     console.error('Failed to parse current bill session from localStorage:', e);
   }
 
-  // First time visitor gets the engaging Road Trip scenario
-  const demo = getDemoBillSession();
-  saveCurrentBillSession(demo);
-  return demo;
+  // When no saved bills exist in localStorage, initialize a fresh, empty bill session
+  const empty = createEmptyBill();
+  saveCurrentBillSession(empty);
+  return empty;
 }
 
 export function saveCurrentBillSession(session: BillSession): void {
@@ -54,20 +64,14 @@ export function saveCurrentBillSession(session: BillSession): void {
 }
 
 export function createNewEmptyBill(
-  title: string = 'New Group Expense Bill',
+  title: string = 'New Expense Split',
   category: BillSession['category'] = 'General'
 ): BillSession {
   return {
-    id: `bill-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    ...createEmptyBill(),
     title,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    currency: '₹',
     category,
-    members: [],
-    items: [],
-    payments: [],
-    settledTransactionIds: [],
+    currency: '₹',
   };
 }
 

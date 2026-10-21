@@ -72,25 +72,39 @@ export const ReceiptExportModal: React.FC<ReceiptExportModalProps> = ({
 
   const handleDownloadImage = async () => {
     if (!receiptRef.current) return;
+    setIsExportingImage(true);
     try {
-      setIsExportingImage(true);
+      // Wait for fonts and layouts to settle
+      await document.fonts.ready;
+
       const canvas = await html2canvas(receiptRef.current, {
-        scale: 2,
+        scale: 2, // High-res output
         useCORS: true,
+        allowTaint: true,
         backgroundColor: '#ffffff',
+        logging: false,
+        onclone: (clonedDoc) => {
+          // Ensure the cloned node is fully visible and rendered
+          const el = clonedDoc.getElementById('receipt-capture-area');
+          if (el) {
+            el.style.display = 'block';
+            el.style.width = '380px';
+            el.style.margin = '0 auto';
+          }
+        },
       });
 
-      const image = canvas.toDataURL('image/png');
+      const imageUri = canvas.toDataURL('image/png');
       const link = document.createElement('a');
-      link.href = image;
-      link.download = `${billTitle.replace(/[^a-zA-Z0-9_-]/g, '_')}_settlement_receipt.png`;
+      link.download = `${billTitle.replace(/\s+/g, '_')}_Settlement.png`;
+      link.href = imageUri;
       link.click();
 
       setImageDownloaded(true);
       setTimeout(() => setImageDownloaded(false), 3000);
     } catch (err) {
-      console.error('Failed to export receipt image:', err);
-      alert('Could not export image. Please try copying text instead.');
+      console.error('Receipt generation failed:', err);
+      alert('Could not generate PNG image. Please copy the WhatsApp summary instead.');
     } finally {
       setIsExportingImage(false);
     }
@@ -170,22 +184,61 @@ export const ReceiptExportModal: React.FC<ReceiptExportModalProps> = ({
           <div className="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1 bg-slate-100 flex justify-center">
             {/* The printable receipt card element */}
             <div
+              id="receipt-capture-area"
               ref={receiptRef}
-              className="bg-white p-6 rounded-2xl shadow-md border border-slate-300 max-w-md w-full text-slate-900 font-sans"
-              style={{ width: '420px' }}
+              style={{
+                backgroundColor: '#ffffff',
+                color: '#09090b',
+                border: '1px solid #e4e4e7',
+                borderRadius: '16px',
+                padding: '24px',
+                width: '380px',
+                margin: '0 auto',
+                fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                boxSizing: 'border-box',
+              }}
             >
               {/* Receipt Header */}
-              <div className="text-center pb-4 border-b-2 border-dashed border-slate-300">
-                <div className="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black uppercase tracking-wider mb-1">
+              <div style={{ textAlign: 'center', paddingBottom: '16px', borderBottom: '2px dashed #d4d4d8' }}>
+                <div
+                  style={{
+                    display: 'inline-block',
+                    padding: '3px 12px',
+                    borderRadius: '9999px',
+                    backgroundColor: '#d1fae5',
+                    color: '#065f46',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    marginBottom: '6px',
+                  }}
+                >
                   SmartSplit Settlement
                 </div>
-                <h2 className="text-xl font-black text-slate-900 tracking-tight">
+                <h2
+                  style={{
+                    fontSize: '20px',
+                    fontWeight: 900,
+                    color: '#09090b',
+                    letterSpacing: '-0.02em',
+                    margin: '4px 0 0 0',
+                    wordBreak: 'break-word',
+                  }}
+                >
                   {billTitle}
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p style={{ fontSize: '12px', color: '#71717a', margin: '4px 0 0 0' }}>
                   Universal Group Expense Report
                 </p>
-                <p className="text-[11px] text-slate-400 mt-1 font-mono">
+                <p
+                  style={{
+                    fontSize: '11px',
+                    color: '#a1a1aa',
+                    marginTop: '4px',
+                    fontFamily: 'monospace',
+                  }}
+                >
                   {new Date().toLocaleDateString('en-IN', {
                     day: 'numeric',
                     month: 'short',
@@ -197,48 +250,93 @@ export const ReceiptExportModal: React.FC<ReceiptExportModalProps> = ({
               </div>
 
               {/* Totals Summary */}
-              <div className="py-3 border-b-2 border-dashed border-slate-300 space-y-1.5 text-xs">
-                <div className="flex justify-between font-bold text-slate-900 text-sm">
+              <div style={{ padding: '12px 0', borderBottom: '2px dashed #d4d4d8', fontSize: '12px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    fontWeight: 800,
+                    color: '#09090b',
+                    fontSize: '14px',
+                    marginBottom: '6px',
+                  }}
+                >
                   <span>Total Expenses:</span>
-                  <span className="font-mono">{formatCurrency(totals.totalBill, currency)}</span>
+                  <span style={{ fontFamily: 'monospace' }}>{formatCurrency(totals.totalBill, currency)}</span>
                 </div>
-                <div className="flex justify-between text-slate-600">
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    color: '#52525b',
+                    marginBottom: '4px',
+                  }}
+                >
                   <span>Total Paid Upfront:</span>
-                  <span className="font-semibold text-slate-800 font-mono">
+                  <span style={{ fontWeight: 600, color: '#18181b', fontFamily: 'monospace' }}>
                     {formatCurrency(totals.totalPaid, currency)}
                   </span>
                 </div>
-                <div className="flex justify-between text-slate-500 text-[11px]">
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    color: '#71717a',
+                    fontSize: '11px',
+                  }}
+                >
                   <span>Group Size:</span>
-                  <span className="font-mono">{members.length} members ({items.length} items)</span>
+                  <span style={{ fontFamily: 'monospace' }}>
+                    {members.length} members ({items.length} items)
+                  </span>
                 </div>
               </div>
 
               {/* Who Pays Whom / Settlements */}
-              <div className="py-3 border-b-2 border-dashed border-slate-300">
-                <div className="text-[11px] font-black uppercase tracking-wider text-slate-500 mb-2 flex items-center space-x-1">
-                  <ArrowRightLeft className="w-3.5 h-3.5 text-purple-600" />
+              <div style={{ padding: '12px 0', borderBottom: '2px dashed #d4d4d8' }}>
+                <div
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    color: '#71717a',
+                    marginBottom: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <ArrowRightLeft style={{ width: '14px', height: '14px', color: '#7c3aed' }} />
                   <span>Settlement Transfers ({transactions.length})</span>
                 </div>
 
                 {transactions.length === 0 ? (
-                  <p className="text-xs text-emerald-600 font-medium italic">
+                  <p style={{ fontSize: '12px', color: '#059669', fontWeight: 600, fontStyle: 'italic', margin: 0 }}>
                     All settled! No payments required.
                   </p>
                 ) : (
-                  <div className="space-y-1.5">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     {transactions.map((tx, i) => {
                       const fromM = memberMap.get(tx.fromMemberId)?.name || 'Someone';
                       const toM = memberMap.get(tx.toMemberId)?.name || 'Someone';
                       return (
                         <div
                           key={i}
-                          className="flex items-center justify-between bg-slate-50 p-2 rounded-lg text-xs"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            backgroundColor: '#f4f4f5',
+                            padding: '8px 10px',
+                            borderRadius: '8px',
+                            fontSize: '12px',
+                          }}
                         >
-                          <span className="font-semibold text-slate-800">
+                          <span style={{ fontWeight: 600, color: '#18181b' }}>
                             {fromM} ➡️ {toM}
                           </span>
-                          <span className="font-black text-slate-900 font-mono">
+                          <span style={{ fontWeight: 800, color: '#09090b', fontFamily: 'monospace' }}>
                             {formatCurrency(tx.amount, currency)}
                           </span>
                         </div>
@@ -249,22 +347,52 @@ export const ReceiptExportModal: React.FC<ReceiptExportModalProps> = ({
               </div>
 
               {/* Members Net Balances */}
-              <div className="py-3 border-b-2 border-dashed border-slate-300">
-                <div className="text-[11px] font-black uppercase tracking-wider text-slate-500 mb-2">
+              <div style={{ padding: '12px 0', borderBottom: '2px dashed #d4d4d8' }}>
+                <div
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    color: '#71717a',
+                    marginBottom: '8px',
+                  }}
+                >
                   Member Balances
                 </div>
-                <div className="space-y-1 text-xs">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '12px' }}>
                   {financials.map((f) => (
-                    <div key={f.member.id} className="flex justify-between py-0.5">
-                      <span className="text-slate-700 truncate mr-2">{f.member.name}</span>
+                    <div
+                      key={f.member.id}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        padding: '2px 0',
+                      }}
+                    >
                       <span
-                        className={`font-bold shrink-0 font-mono ${
-                          f.netBalance > 0.01
-                            ? 'text-emerald-700'
-                            : f.netBalance < -0.01
-                            ? 'text-rose-700'
-                            : 'text-slate-400'
-                        }`}
+                        style={{
+                          color: '#3f3f46',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          marginRight: '8px',
+                        }}
+                      >
+                        {f.member.name}
+                      </span>
+                      <span
+                        style={{
+                          fontWeight: 700,
+                          flexShrink: 0,
+                          fontFamily: 'monospace',
+                          color:
+                            f.netBalance > 0.01
+                              ? '#047857'
+                              : f.netBalance < -0.01
+                              ? '#b91c1c'
+                              : '#71717a',
+                        }}
                       >
                         {f.netBalance > 0.01 ? '+' : ''}
                         {formatCurrency(f.netBalance, currency)}
@@ -275,11 +403,27 @@ export const ReceiptExportModal: React.FC<ReceiptExportModalProps> = ({
               </div>
 
               {/* Barcode Footer */}
-              <div className="pt-4 text-center">
-                <div className="flex justify-center mb-1 text-slate-800 opacity-80">
-                  <Barcode className="w-48 h-8" />
+              <div style={{ paddingTop: '16px', textAlign: 'center' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    marginBottom: '4px',
+                    color: '#27272a',
+                  }}
+                >
+                  <Barcode style={{ width: '180px', height: '32px' }} />
                 </div>
-                <p className="text-[10px] text-slate-400 uppercase font-mono tracking-widest">
+                <p
+                  style={{
+                    fontSize: '10px',
+                    color: '#a1a1aa',
+                    textTransform: 'uppercase',
+                    fontFamily: 'monospace',
+                    letterSpacing: '0.1em',
+                    margin: 0,
+                  }}
+                >
                   SMARTSPLIT-APP-VERIFIED
                 </p>
               </div>

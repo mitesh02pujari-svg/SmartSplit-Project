@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Users, UserPlus, Sparkles } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { BillSummaryBar } from './components/BillSummaryBar';
 import { ItemManager } from './components/ItemManager';
@@ -17,10 +18,13 @@ import {
 } from './utils/storage';
 import { calculateSettlementTransactions } from './utils/calculator';
 import { getMemberColor } from './utils/formatters';
+import { getDemoBillSession } from './utils/demoData';
 
 export function App() {
   const [session, setSession] = useState<BillSession>(() => loadCurrentBillSession());
-  const [activeTab, setActiveTab] = useState<'items' | 'members' | 'payments' | 'settlement'>('items');
+  const [activeTab, setActiveTab] = useState<'items' | 'members' | 'payments' | 'settlement'>(
+    () => (loadCurrentBillSession().members.length === 0 ? 'members' : 'items')
+  );
   const [selectedPassbookMember, setSelectedPassbookMember] = useState<Member | null>(null);
   const [showExportModal, setShowExportModal] = useState(false);
 
@@ -262,6 +266,36 @@ export function App() {
 
       {/* Main Tab Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+        {session.members.length === 0 && (
+          <div className="mb-6 bg-white rounded-2xl border-2 border-dashed border-emerald-300 p-6 sm:p-8 text-center shadow-xs">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3">
+              <Users className="w-7 h-7" />
+            </div>
+            <h3 className="text-base sm:text-lg font-bold text-slate-800">
+              No members in group yet
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto mt-1 mb-5">
+              Add group members above or load a sample scenario to get started.
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <button
+                onClick={() => setActiveTab('members')}
+                className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>Add Group Members</span>
+              </button>
+              <button
+                onClick={() => handleLoadScenario(getDemoBillSession())}
+                className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition"
+              >
+                <Sparkles className="w-4 h-4 text-amber-500" />
+                <span>Load Sample Trip</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'items' && (
           <ItemManager
             items={session.items}
@@ -285,6 +319,7 @@ export function App() {
             onDeleteMember={handleDeleteMember}
             onSelectMemberPassbook={(m) => setSelectedPassbookMember(m)}
             currency={session.currency || '₹'}
+            onLoadSample={() => handleLoadScenario(getDemoBillSession())}
           />
         )}
 
