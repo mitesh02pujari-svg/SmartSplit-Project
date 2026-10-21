@@ -1,133 +1,167 @@
-# 🛒 SmartSplit — Universal Group Expense & Bill Reconciliation Engine
+# 🛒 SmartSplit – Smart Bill Splitting App
 
-> Production-ready, responsive single-page web application designed for **road trips**, **group vacations**, **shared flat groceries**, **restaurant dinners**, and **general shopping runs**.
+SmartSplit is a simple and user-friendly web application that helps friends split bills easily. It is useful for road trips, group vacations, restaurant dinners, shopping, and shared living expenses.
 
-SmartSplit solves two primary friction points in group activities:
-1. **Mixed Item Ownership on a Master Bill**: Master bills often combine items shared across the entire group (`ALL`), items shared only by a sub-group of 2–4 people (`SUBSET`), and 100% personal items (`SOLO`).
-2. **Uncoordinated Upfront Payments**: Multiple members make arbitrary payments via cash, cards, or UPI at the checkout register or vendor counter. SmartSplit reconciles them with mathematical precision down to the **minimum possible peer-to-peer transfers**.
+You can add items, choose who shares each item, record who paid at the counter, and calculate how much each person owes. SmartSplit also finds a simple way to settle payments with fewer transactions.
 
----
+## ✨ Features
 
-## 📐 Core Data Models (TypeScript)
+### 1. Flexible Bill Splitting
+- **Split with Everyone:** Divide an item's cost equally among all group members.
+- **Split with Selected People:** Choose specific people who shared an item.
+- **Personal Items:** Assign an item's full cost to one person.
 
-Strictly conforms to specification:
+### 2. Counter Payment Tracker
+- Record how much each person paid.
+- Track the total amount paid against the bill.
+- See whether the bill is balanced or money is still missing.
 
-```typescript
-export type SplitType = 'ALL' | 'SUBSET' | 'SOLO';
+### 3. Minimum Payment Calculator
+- Calculate how much each person owes or should receive.
+- Find a simple settlement plan with fewer payments.
+- Avoid unnecessary back-and-forth transactions.
 
-export interface Member {
-  id: string;
-  name: string;
-  upiId?: string;
-  color: string;
-}
+### 4. UPI Payment
+- Use the **Pay via UPI** option to start a payment through a compatible UPI app.
+- Make settling bills easier on supported mobile devices.
 
-export interface BillItem {
-  id: string;
-  name: string;
-  amount: number;
-  splitType: SplitType;
-  assignedMemberIds: string[]; // empty if ALL, multiple if SUBSET, 1 if SOLO
-  category?: string;
-}
+### 5. Share on WhatsApp
+- Share a formatted bill summary with your friends.
+- Include each person's total and payment settlement details.
+- Make it easy for everyone to understand their share.
 
-export interface PaymentContribution {
-  memberId: string;
-  amountPaid: number;
-}
+### 6. Save Trips and Work Offline
+- Save multiple trips for later use.
+- Open saved trips whenever needed.
+- Store trip data in your browser using Local Storage.
+- Use the app without requiring a backend server for its core features.
 
-export interface Transaction {
-  fromMemberId: string;
-  toMemberId: string;
-  amount: number;
-  settled?: boolean;
-}
+## 🖥️ Tech Stack
 
-export interface BillSession {
-  id: string;
-  title: string;
-  createdAt: string;
-  members: Member[];
-  items: BillItem[];
-  payments: PaymentContribution[];
-  settledTransactionIds?: string[];
-  category?: 'Groceries' | 'Road Trip' | 'Vacation' | 'Restaurant' | 'Flatmates' | 'General';
-  updatedAt?: string;
-  currency?: string;
-  notes?: string;
-}
-```
+| Technology | Purpose |
+|---|---|
+| React | Builds the user interface |
+| TypeScript | Makes the code more reliable with type checking |
+| Tailwind CSS | Creates a clean and responsive design |
+| Vite | Provides a fast development environment |
+| Local Storage | Saves trip data in the browser |
 
----
+## 🚀 Getting Started
 
-## 🌟 Key Capabilities & Architectural Highlights
+Follow these steps to run SmartSplit on your computer.
 
-### 1. Mixed Ownership Allocation (`ALL`, `SUBSET`, `SOLO`)
-- 👥 **Everyone (`ALL`)**: Shared equally by all $N$ members.
-- 🎯 **Specific Subgroups (`SUBSET`)**: Shared equally among selected members (e.g. alcohol drinkers, non-vegetarian eaters, coffee lovers). Includes **Select All**, **Clear**, and **Invert** shortcuts.
-- 👤 **Personal Solo Items (`SOLO`)**: 100% assigned to a single member.
+### Prerequisites
 
-### 2. Multi-Payer Register Reconciliation
-- Real-time comparison between **Total Bill Items** and **Total Paid Upfront**.
-- Automatic discrepancy alerts:
-  - 🟢 **Balanced**: Upfront payments exactly match bill total.
-  - 🟡 **Shortfall**: Displays remaining unpaid balance with a 1-click **"+ Remainder"** button to allocate.
-  - 🔵 **Excess**: Alerts if upfront payments exceed the bill.
+Make sure you have installed:
 
-### 3. $O(N)$ Greedy Debt Simplification Algorithm
-- Standard two-pointer greedy balance matching reduces all cyclic/multi-way debts down to the **minimum possible number of transactions** (at most $N - 1$).
-- Saves groups from dozens of chaotic small transfers.
-- Interactive **"Mark as Settled"** persistent checkbox checklist on each transfer card.
-- Fires a **canvas-confetti** celebration when the group is 100% settled!
+- [Node.js](https://nodejs.org/)
+- npm, which comes with Node.js
+- Git
 
-### 4. 1-Tap UPI Mobile Deep-Linking
-- Payee cards include direct `upi://pay?pa=...&am=...` deep-links.
-- On mobile devices, tapping **"Pay via UPI"** automatically launches Google Pay, PhonePe, or Paytm with payee and amount pre-filled!
+### 1. Clone the Repository
 
-### 5. Pre-loaded Scenario Templates
-Switch instantly between 5 real-world group scenarios:
-- 🚗 **Mountain Road Trip (6 People)**: Fuel tanks, FASTag tolls, roadside dhaba meals, driver energy drinks, and personal gear.
-- 🏖️ **Goa Villa Getaway (10 People)**: Villa breakfast groceries, pool party drinks, fresh seafood BBQ, and solo surf rentals.
-- 🍽️ **Restaurant Celebration Dinner (8 People)**: Shared appetizers, craft cocktails subset, veg/non-veg mains, and solo desserts.
-- 🏠 **Shared Flat Monthly Expenses (4 Roommates)**: 300 Mbps fiber WiFi, communal kitchen staples, dietary splits, and personal whey protein.
-- 🛒 **Hypermarket / DMart Mega Haul (10 People)**: Communal grocery staples, cleaning supplies, and personal toiletries.
-
-### 6. Exporting & WhatsApp Sharing
-- 📱 **WhatsApp Message Generator**: 1-click formatted copy with emojis, bold headers, item totals, and settlement steps ready to paste into chat.
-- 🖼️ **Graphic PNG Settlement Receipt**: Generated via `html2canvas` with barcode, summary totals, and who-pays-whom table.
-- 📋 **Personal Passbooks**: Click any member to view and copy their personal ledger.
-- 💾 **JSON Backup & Restore**: Export or import sessions to JSON files.
-
----
-
-## 🛠️ Tech Stack
-
-- **Framework**: React 19 + Vite (TypeScript)
-- **Styling**: Tailwind CSS v4 (neutral slate/zinc palette, emerald/indigo accents, `font-mono` for all financial figures)
-- **Icons**: Lucide React
-- **Exporting**: `html2canvas` & clipboard WhatsApp markdown
-- **Effects**: `canvas-confetti`
-- **Persistence**: LocalStorage with multi-bill history
-
----
-
-## 🚀 Running the Project
+Open your terminal and run:
 
 ```bash
-# Navigate to project
-cd C:\Programming\Projects\SmartSplit
+git clone https://github.com/mitesh02pujari-svg/SmartSplit-Project.git
+```
 
-# Install dependencies (if not already done)
+### 2. Open the Project Folder
+
+```bash
+cd SmartSplit-Project
+```
+
+### 3. Install Dependencies
+
+```bash
 npm install
+```
 
-# Start Vite development server
+### 4. Start the Development Server
+
+```bash
 npm run dev
 ```
 
-Open **`http://localhost:5173`** in your browser.
+### 5. Open the Application
 
-To run a production build:
-```bash
-npm run build
-npm run preview
+The terminal will display a local URL, usually:
+
+```text
+http://localhost:5173
 ```
+
+Open the displayed URL in your browser to use SmartSplit.
+
+## 📖 How to Use SmartSplit
+
+1. **Create a group:** Add the people participating in the trip or expense.
+2. **Add items:** Enter the items and their prices.
+3. **Choose participants:** Select everyone, specific people, or one person for each item.
+4. **Record payments:** Enter how much each person paid at the counter.
+5. **Check the bill:** Review the total expense and the amount paid.
+6. **Calculate settlements:** Find out who needs to pay and who should receive money.
+7. **Settle the bill:** Use the UPI payment option where supported.
+8. **Share the summary:** Send the settlement details through WhatsApp.
+9. **Save your trip:** Store the trip and return to it later.
+
+## 🧮 Example
+
+Suppose three friends — Rahul, Priya, and Amit — go out for dinner.
+
+| Item | Cost | Shared By |
+|---|---:|---|
+| Pizza | ₹600 | All three |
+| Cold Coffee | ₹200 | Rahul and Priya |
+| Burger | ₹150 | Amit |
+
+The total bill is ₹950.
+
+Each person's share is:
+
+- **Rahul:** ₹300 + ₹100 = ₹400
+- **Priya:** ₹300 + ₹100 = ₹400
+- **Amit:** ₹300 + ₹150 = ₹450
+
+If Rahul pays ₹500, Priya pays ₹300, and Amit pays ₹150 at the counter, the total paid is ₹950.
+
+SmartSplit calculates the difference between what each person paid and their actual share, then generates the settlement instructions.
+
+## 🔒 Data Storage and Privacy
+
+- Trip data is stored locally in the browser using Local Storage.
+- The core application does not require a backend server.
+- Saved data is associated with the browser and device being used.
+- Clearing browser data may delete saved trips.
+- Use the same browser and device to access locally saved trips.
+
+## 📱 Responsive Design
+
+SmartSplit is designed to provide a convenient experience on desktop and mobile screens, making it useful while travelling or sharing expenses with friends.
+
+## 🎯 Project Goal
+
+The goal of SmartSplit is to make group expense management simple, accurate, and less time-consuming.
+
+Instead of calculating every person's share manually, users can enter their expenses and payments and let the application work out the settlement plan.
+
+## 🔮 Future Improvements
+
+Possible improvements for future versions include:
+
+- Cloud backup and account-based access.
+- Exporting bills as PDF files.
+- Expense history and monthly summaries.
+- More payment and currency options.
+- Improved trip sharing between devices.
+
+## 👨‍💻 Author
+
+**Mitesh Pujari**
+
+GitHub: [mitesh02pujari-svg](https://github.com/mitesh02pujari-svg)
+
+## 📄 License
+
+This project is available for learning and personal use. Add a formal open-source license if you want others to use, modify, and distribute the project under defined terms.
